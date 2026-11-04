@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { AuthService } from '../../../core/auth.service';
+import { SelectedEventService } from '../../../core/selected-event.service';
 import { EventService } from '../../../services/event.service';
 import { TicketService } from '../../../services/ticket.service';
 import { TicketDoc, TicketHistoryEntry, TicketStatus } from '../../../models/ticket.model';
@@ -17,24 +18,36 @@ export class HistoryComponent {
   private readonly eventService = inject(EventService);
   private readonly ticketService = inject(TicketService);
   private readonly auth = inject(AuthService);
+  private readonly selectedEvent = inject(SelectedEventService);
 
   readonly events$ = this.eventService.events$;
 
-  readonly selectedEventId = signal<string | null>(null);
+  readonly selectedEventId = this.selectedEvent.selectedEventId;
   readonly tickets = signal<TicketDoc[]>([]);
   readonly expandedTicketId = signal<string | null>(null);
   readonly expandedHistory = signal<TicketHistoryEntry[]>([]);
   readonly correctionNote = signal('');
   readonly correctionBusy = signal(false);
 
+  constructor() {
+    const eventId = this.selectedEvent.selectedEventId();
+    if (eventId) {
+      this.loadTickets(eventId);
+    }
+  }
+
   onSelectEvent(eventId: string): void {
-    this.selectedEventId.set(eventId || null);
+    this.selectedEvent.select(eventId || null);
     this.expandedTicketId.set(null);
     this.expandedHistory.set([]);
     if (!eventId) {
       this.tickets.set([]);
       return;
     }
+    this.loadTickets(eventId);
+  }
+
+  private loadTickets(eventId: string): void {
     this.ticketService.listTickets$(eventId).subscribe((tickets) => this.tickets.set(tickets));
   }
 

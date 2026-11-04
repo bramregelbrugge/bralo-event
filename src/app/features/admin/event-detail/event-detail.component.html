@@ -34,16 +34,31 @@
   @for (ticket of tickets(); track ticket.id) {
     <div class="ticket-card" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
       <app-ticket-qr [payload]="qrPayload(ticket)" />
-      <div class="ticket-info">
-        <strong>{{ ticket.holderName }}</strong>
-        <span class="seat">Ticket {{ ticket.seatIndex }}/{{ ticket.seatTotal }}</span>
-        @if (ticket.holderEmail) {
-          <span class="email">{{ ticket.holderEmail }}</span>
-        }
-        <span class="status" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
-          {{ statusLabel(ticket.status) }}
-        </span>
-      </div>
+
+      @if (editingTicketId() === ticket.id) {
+        <div class="edit-form">
+          <input type="text" placeholder="Naam" [(ngModel)]="editDraft.holderName" />
+          <input type="email" placeholder="E-mail" [(ngModel)]="editDraft.holderEmail" />
+          <div class="edit-actions">
+            <button type="button" [disabled]="editSaving()" (click)="saveEdit(ticket)">
+              {{ editSaving() ? 'Opslaan...' : 'Opslaan' }}
+            </button>
+            <button type="button" class="ghost" (click)="cancelEdit()">Annuleren</button>
+          </div>
+        </div>
+      } @else {
+        <div class="ticket-info">
+          <strong>{{ ticket.holderName }}</strong>
+          <span class="seat">Ticket {{ ticket.seatIndex }}/{{ ticket.seatTotal }}</span>
+          @if (ticket.holderEmail) {
+            <span class="email">{{ ticket.holderEmail }}</span>
+          }
+          <span class="status" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
+            {{ statusLabel(ticket.status) }}
+          </span>
+          <button type="button" class="edit-link" (click)="startEdit(ticket)">Bewerken</button>
+        </div>
+      }
     </div>
   } @empty {
     <p class="empty">Nog geen tickets voor dit event.</p>

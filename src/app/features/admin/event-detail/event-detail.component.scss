@@ -134,6 +134,55 @@
         color: #dc2626;
       }
     }
+
+    .edit-link {
+      margin-top: 0.4rem;
+      border: none;
+      background: none;
+      color: #2563eb;
+      font-size: 0.75rem;
+      cursor: pointer;
+      padding: 0;
+    }
+  }
+
+  .edit-form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    input {
+      padding: 0.45rem 0.6rem;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.85rem;
+    }
+
+    .edit-actions {
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        flex: 1;
+        padding: 0.4rem;
+        border: none;
+        border-radius: 6px;
+        background: #2563eb;
+        color: #fff;
+        font-size: 0.8rem;
+        cursor: pointer;
+
+        &:disabled {
+          opacity: 0.6;
+        }
+
+        &.ghost {
+          background: #e2e8f0;
+          color: #334155;
+        }
+      }
+    }
   }
 }
 

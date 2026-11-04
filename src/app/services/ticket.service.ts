@@ -164,6 +164,48 @@ export class TicketService {
     });
   }
 
+  async updateTicketDetails(
+    eventId: string,
+    ticketId: string,
+    details: { holderName: string; holderEmail: string },
+    editedBy: string,
+  ): Promise<void> {
+    const ticketRef = doc(ticketsCol(eventId), ticketId);
+    const historyRef = doc(historyCol(eventId, ticketId));
+    const now = Date.now();
+
+    await runTransaction(firestore, async (tx) => {
+      const snap = await tx.get(ticketRef);
+      if (!snap.exists()) {
+        throw new Error('Ticket niet gevonden.');
+      }
+      const ticket = snap.data() as Omit<TicketDoc, 'id'>;
+      const changes: string[] = [];
+      if (ticket.holderName !== details.holderName) {
+        changes.push(`naam: "${ticket.holderName}" → "${details.holderName}"`);
+      }
+      if (ticket.holderEmail !== details.holderEmail) {
+        changes.push(`e-mail: "${ticket.holderEmail}" → "${details.holderEmail}"`);
+      }
+      if (changes.length === 0) {
+        return;
+      }
+
+      tx.update(ticketRef, {
+        holderName: details.holderName,
+        holderEmail: details.holderEmail,
+      });
+      tx.set(historyRef, {
+        type: 'correction',
+        at: now,
+        by: editedBy,
+        fromStatus: ticket.status,
+        toStatus: ticket.status,
+        note: `Gegevens aangepast (${changes.join(', ')})`,
+      } satisfies Omit<TicketHistoryEntry, 'id'>);
+    });
+  }
+
   async correctTicket(
     eventId: string,
     ticketId: string,
