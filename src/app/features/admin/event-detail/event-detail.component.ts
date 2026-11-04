@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -31,6 +31,19 @@ export class EventDetailComponent {
   );
   readonly tickets = toSignal(this.ticketService.listTickets$(this.eventId), {
     initialValue: [] as TicketDoc[],
+  });
+
+  readonly search = signal('');
+  readonly filteredTickets = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    if (!term) {
+      return this.tickets();
+    }
+    return this.tickets().filter(
+      (ticket) =>
+        ticket.holderName.toLowerCase().includes(term) ||
+        ticket.holderEmail.toLowerCase().includes(term),
+    );
   });
 
   readonly showForm = signal(false);

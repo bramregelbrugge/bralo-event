@@ -30,8 +30,20 @@
   </form>
 }
 
+@if (tickets().length > 0) {
+  <div class="search-bar">
+    <input
+      type="search"
+      placeholder="Zoek op naam of e-mail..."
+      [ngModel]="search()"
+      (ngModelChange)="search.set($event)"
+    />
+    <span class="count">{{ filteredTickets().length }} / {{ tickets().length }} tickets</span>
+  </div>
+}
+
 <div class="ticket-grid">
-  @for (ticket of tickets(); track ticket.id) {
+  @for (ticket of filteredTickets(); track ticket.id) {
     <div class="ticket-card" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
       <app-ticket-qr [payload]="qrPayload(ticket)" />
 
@@ -61,6 +73,8 @@
       }
     </div>
   } @empty {
-    <p class="empty">Nog geen tickets voor dit event.</p>
+    <p class="empty">
+      {{ tickets().length === 0 ? 'Nog geen tickets voor dit event.' : 'Geen tickets gevonden.' }}
+    </p>
   }
 </div>
