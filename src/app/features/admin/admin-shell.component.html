@@ -8,6 +8,17 @@
       <a routerLink="/admin/history" routerLinkActive="active">Geschiedenis</a>
       <a routerLink="/scan" routerLinkActive="active">Scanner</a>
     </nav>
+    <select
+      class="event-picker"
+      [ngModel]="selectedEvent.selectedEventId() ?? ''"
+      [ngModelOptions]="{ standalone: true }"
+      (ngModelChange)="onPickEvent($event)"
+    >
+      <option value="" disabled>Kies event...</option>
+      @for (event of events$ | async; track event.id) {
+        <option [value]="event.id">{{ event.name }}</option>
+      }
+    </select>
     <button class="logout" (click)="logout()">Uitloggen</button>
   </header>
   <main class="content">

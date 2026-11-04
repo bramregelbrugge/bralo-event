@@ -2,7 +2,11 @@
 
 <label class="event-select">
   Event
-  <select (change)="onSelectEvent($any($event.target).value)">
+  <select
+    [ngModel]="selectedEventId() ?? ''"
+    [ngModelOptions]="{ standalone: true }"
+    (ngModelChange)="onSelectEvent($event)"
+  >
     <option value="">-- kies een event --</option>
     @for (event of events$ | async; track event.id) {
       <option [value]="event.id">{{ event.name }} ({{ event.date }})</option>

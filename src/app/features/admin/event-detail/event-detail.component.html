@@ -30,22 +30,61 @@
   </form>
 }
 
+@if (tickets().length > 0) {
+  <div class="search-bar">
+    <input
+      type="search"
+      placeholder="Zoek op naam of e-mail..."
+      [ngModel]="search()"
+      (ngModelChange)="onSearchChange($event)"
+    />
+    <span class="count">{{ filteredTickets().length }} / {{ tickets().length }} tickets</span>
+  </div>
+}
+
 <div class="ticket-grid">
-  @for (ticket of tickets(); track ticket.id) {
+  @for (ticket of pagedTickets(); track ticket.id) {
     <div class="ticket-card" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
       <app-ticket-qr [payload]="qrPayload(ticket)" />
-      <div class="ticket-info">
-        <strong>{{ ticket.holderName }}</strong>
-        <span class="seat">Ticket {{ ticket.seatIndex }}/{{ ticket.seatTotal }}</span>
-        @if (ticket.holderEmail) {
-          <span class="email">{{ ticket.holderEmail }}</span>
-        }
-        <span class="status" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
-          {{ statusLabel(ticket.status) }}
-        </span>
-      </div>
+
+      @if (editingTicketId() === ticket.id) {
+        <div class="edit-form">
+          <input type="text" placeholder="Naam" [(ngModel)]="editDraft.holderName" />
+          <input type="email" placeholder="E-mail" [(ngModel)]="editDraft.holderEmail" />
+          <div class="edit-actions">
+            <button type="button" [disabled]="editSaving()" (click)="saveEdit(ticket)">
+              {{ editSaving() ? 'Opslaan...' : 'Opslaan' }}
+            </button>
+            <button type="button" class="ghost" (click)="cancelEdit()">Annuleren</button>
+          </div>
+        </div>
+      } @else {
+        <div class="ticket-info">
+          <strong>{{ ticket.holderName }}</strong>
+          <span class="seat">Ticket {{ ticket.seatIndex }}/{{ ticket.seatTotal }}</span>
+          @if (ticket.holderEmail) {
+            <span class="email">{{ ticket.holderEmail }}</span>
+          }
+          <span class="status" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
+            {{ statusLabel(ticket.status) }}
+          </span>
+          <button type="button" class="edit-link" (click)="startEdit(ticket)">Bewerken</button>
+        </div>
+      }
     </div>
   } @empty {
-    <p class="empty">Nog geen tickets voor dit event.</p>
+    <p class="empty">
+      {{ tickets().length === 0 ? 'Nog geen tickets voor dit event.' : 'Geen tickets gevonden.' }}
+    </p>
   }
 </div>
+
+@if (totalPages() > 1) {
+  <div class="pagination">
+    <button type="button" [disabled]="page() === 1" (click)="goToPage(page() - 1)">&larr; Vorige</button>
+    <span>Pagina {{ page() }} van {{ totalPages() }}</span>
+    <button type="button" [disabled]="page() === totalPages()" (click)="goToPage(page() + 1)">
+      Volgende &rarr;
+    </button>
+  </div>
+}

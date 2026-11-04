@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { switchMap, of } from 'rxjs';
 import { AuthService } from '../../../core/auth.service';
+import { SelectedEventService } from '../../../core/selected-event.service';
 import { EventService } from '../../../services/event.service';
 import { TicketService } from '../../../services/ticket.service';
 import { NewTicketOrder, TicketDoc } from '../../../models/ticket.model';
@@ -21,6 +22,7 @@ export class EventDetailComponent {
   private readonly eventService = inject(EventService);
   private readonly ticketService = inject(TicketService);
   private readonly auth = inject(AuthService);
+  private readonly selectedEvent = inject(SelectedEventService);
 
   readonly eventId = this.route.snapshot.paramMap.get('id')!;
 
@@ -31,10 +33,51 @@ export class EventDetailComponent {
     initialValue: [] as TicketDoc[],
   });
 
+  readonly pageSize = 20;
+  readonly search = signal('');
+  readonly page = signal(1);
+
+  readonly filteredTickets = computed(() => {
+    const term = this.search().trim().toLowerCase();
+    if (!term) {
+      return this.tickets();
+    }
+    return this.tickets().filter(
+      (ticket) =>
+        ticket.holderName.toLowerCase().includes(term) ||
+        ticket.holderEmail.toLowerCase().includes(term),
+    );
+  });
+
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.filteredTickets().length / this.pageSize)));
+
+  readonly pagedTickets = computed(() => {
+    const page = Math.min(this.page(), this.totalPages());
+    const start = (page - 1) * this.pageSize;
+    return this.filteredTickets().slice(start, start + this.pageSize);
+  });
+
+  onSearchChange(term: string): void {
+    this.search.set(term);
+    this.page.set(1);
+  }
+
+  goToPage(page: number): void {
+    this.page.set(Math.min(Math.max(1, page), this.totalPages()));
+  }
+
   readonly showForm = signal(false);
   readonly saving = signal(false);
 
+  readonly editingTicketId = signal<string | null>(null);
+  readonly editSaving = signal(false);
+  editDraft = { holderName: '', holderEmail: '' };
+
   draft: NewTicketOrder = { holderName: '', holderEmail: '', quantity: 1 };
+
+  constructor() {
+    this.selectedEvent.select(this.eventId);
+  }
 
   toggleForm(): void {
     this.showForm.set(!this.showForm());
@@ -52,6 +95,29 @@ export class EventDetailComponent {
       this.showForm.set(false);
     } finally {
       this.saving.set(false);
+    }
+  }
+
+  startEdit(ticket: TicketDoc): void {
+    this.editingTicketId.set(ticket.id);
+    this.editDraft = { holderName: ticket.holderName, holderEmail: ticket.holderEmail };
+  }
+
+  cancelEdit(): void {
+    this.editingTicketId.set(null);
+  }
+
+  async saveEdit(ticket: TicketDoc): Promise<void> {
+    const uid = this.auth.currentUser?.uid;
+    if (!uid || !this.editDraft.holderName) {
+      return;
+    }
+    this.editSaving.set(true);
+    try {
+      await this.ticketService.updateTicketDetails(this.eventId, ticket.id, this.editDraft, uid);
+      this.editingTicketId.set(null);
+    } finally {
+      this.editSaving.set(false);
     }
   }
 
