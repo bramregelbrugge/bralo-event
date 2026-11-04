@@ -1,11 +1,11 @@
 export const environment = {
   production: false,
   firebase: {
-    apiKey: 'YOUR_API_KEY',
-    authDomain: 'YOUR_PROJECT_ID.firebaseapp.com',
-    projectId: 'YOUR_PROJECT_ID',
-    storageBucket: 'YOUR_PROJECT_ID.appspot.com',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    appId: 'YOUR_APP_ID',
+    apiKey: 'AIzaSyCG3NHWwUSDFYYWhxeIRS_nYtXTh3Ufb0s',
+    authDomain: 'bralo-event.firebaseapp.com',
+    projectId: 'bralo-event',
+    storageBucket: 'bralo-event.firebasestorage.app',
+    messagingSenderId: '567102818685',
+    appId: '1:567102818685:web:20320bcac826b269f9a414',
   },
 };
