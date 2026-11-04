@@ -1,0 +1,51 @@
+<a class="back" routerLink="/admin">&larr; Alle events</a>
+
+@if (event()) {
+  <div class="page-header">
+    <div>
+      <h1>{{ event()!.name }}</h1>
+      <p class="meta">{{ event()!.date }} @if (event()!.location) { · {{ event()!.location }} }</p>
+    </div>
+    <button (click)="toggleForm()">{{ showForm() ? 'Annuleren' : '+ Tickets aanmaken' }}</button>
+  </div>
+}
+
+@if (showForm()) {
+  <form class="card" (ngSubmit)="createOrder()">
+    <label>
+      Naam
+      <input type="text" name="holderName" [(ngModel)]="draft.holderName" required />
+    </label>
+    <label>
+      E-mail
+      <input type="email" name="holderEmail" [(ngModel)]="draft.holderEmail" />
+    </label>
+    <label>
+      Aantal tickets
+      <input type="number" name="quantity" min="1" [(ngModel)]="draft.quantity" required />
+    </label>
+    <button type="submit" [disabled]="saving()">
+      {{ saving() ? 'Aanmaken...' : 'Tickets aanmaken' }}
+    </button>
+  </form>
+}
+
+<div class="ticket-grid">
+  @for (ticket of tickets(); track ticket.id) {
+    <div class="ticket-card" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
+      <app-ticket-qr [payload]="qrPayload(ticket)" />
+      <div class="ticket-info">
+        <strong>{{ ticket.holderName }}</strong>
+        <span class="seat">Ticket {{ ticket.seatIndex }}/{{ ticket.seatTotal }}</span>
+        @if (ticket.holderEmail) {
+          <span class="email">{{ ticket.holderEmail }}</span>
+        }
+        <span class="status" [class.used]="ticket.status === 'used'" [class.void]="ticket.status === 'void'">
+          {{ statusLabel(ticket.status) }}
+        </span>
+      </div>
+    </div>
+  } @empty {
+    <p class="empty">Nog geen tickets voor dit event.</p>
+  }
+</div>

@@ -1,0 +1,93 @@
+<h1>Ticketgeschiedenis &amp; correcties</h1>
+
+<label class="event-select">
+  Event
+  <select (change)="onSelectEvent($any($event.target).value)">
+    <option value="">-- kies een event --</option>
+    @for (event of events$ | async; track event.id) {
+      <option [value]="event.id">{{ event.name }} ({{ event.date }})</option>
+    }
+  </select>
+</label>
+
+@if (selectedEventId()) {
+  <table class="ticket-table">
+    <thead>
+      <tr>
+        <th>Naam</th>
+        <th>Ticket</th>
+        <th>Status</th>
+        <th>Gescand op</th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (ticket of tickets(); track ticket.id) {
+        <tr class="ticket-row" (click)="toggleTicket(ticket)">
+          <td>{{ ticket.holderName }}</td>
+          <td>{{ ticket.seatIndex }}/{{ ticket.seatTotal }}</td>
+          <td><span class="status" [class]="ticket.status">{{ statusLabel(ticket.status) }}</span></td>
+          <td>{{ ticket.scannedAt ? (ticket.scannedAt | date: 'short') : '-' }}</td>
+          <td class="chevron">{{ expandedTicketId() === ticket.id ? '▲' : '▼' }}</td>
+        </tr>
+        @if (expandedTicketId() === ticket.id) {
+          <tr class="detail-row">
+            <td colspan="5">
+              <div class="detail">
+                <div class="history-log">
+                  <h4>Logboek</h4>
+                  @for (entry of expandedHistory(); track entry.id) {
+                    <div class="log-entry">
+                      <span class="type">{{ historyTypeLabel(entry.type) }}</span>
+                      <span class="when">{{ entry.at | date: 'short' }}</span>
+                      <span class="note">{{ entry.note }}</span>
+                    </div>
+                  } @empty {
+                    <p class="empty">Geen logboekgegevens.</p>
+                  }
+                </div>
+                <div class="correction">
+                  <h4>Correctie</h4>
+                  <input
+                    type="text"
+                    placeholder="Reden voor correctie (optioneel)"
+                    [(ngModel)]="correctionNote"
+                    [ngModelOptions]="{ standalone: true }"
+                  />
+                  <div class="actions">
+                    <button
+                      type="button"
+                      [disabled]="correctionBusy() || ticket.status === 'valid'"
+                      (click)="correct(ticket, 'valid')"
+                    >
+                      Reset naar geldig
+                    </button>
+                    <button
+                      type="button"
+                      [disabled]="correctionBusy() || ticket.status === 'used'"
+                      (click)="correct(ticket, 'used')"
+                    >
+                      Markeer als binnen
+                    </button>
+                    <button
+                      type="button"
+                      class="danger"
+                      [disabled]="correctionBusy() || ticket.status === 'void'"
+                      (click)="correct(ticket, 'void')"
+                    >
+                      Annuleer ticket
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
+        }
+      } @empty {
+        <tr>
+          <td colspan="5" class="empty">Geen tickets voor dit event.</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

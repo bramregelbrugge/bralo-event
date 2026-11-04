@@ -1,0 +1,31 @@
+<div class="scanner-page">
+  <header>
+    <a routerLink="/admin" class="back">&larr; Admin</a>
+    <span class="count">{{ scanCount() }} gescand</span>
+  </header>
+
+  <div #readerEl id="qr-reader" class="reader"></div>
+
+  @if (cameraError()) {
+    <p class="camera-error">{{ cameraError() }}</p>
+  }
+
+  @if (result()) {
+    <div
+      class="result-overlay"
+      [class.ok]="result()!.outcome === 'admitted'"
+      [class.warn]="result()!.outcome === 'already_used'"
+      [class.bad]="result()!.outcome === 'invalid' || result()!.outcome === 'void' || result()!.outcome === 'not_found'"
+      (click)="dismissResult()"
+    >
+      <div class="result-card">
+        @if (result()!.ticket) {
+          <h2>{{ result()!.ticket!.holderName }}</h2>
+          <p class="seat">Ticket {{ result()!.ticket!.seatIndex }}/{{ result()!.ticket!.seatTotal }}</p>
+        }
+        <p class="message">{{ result()!.message }}</p>
+        <p class="tap">Tik om verder te scannen</p>
+      </div>
+    </div>
+  }
+</div>
