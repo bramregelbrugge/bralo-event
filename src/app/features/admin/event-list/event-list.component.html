@@ -1,0 +1,38 @@
+<div class="page-header">
+  <h1>Events</h1>
+  <button (click)="toggleForm()">{{ showForm() ? 'Annuleren' : '+ Nieuw event' }}</button>
+</div>
+
+@if (showForm()) {
+  <form class="card" (ngSubmit)="createEvent()">
+    <label>
+      Naam
+      <input type="text" name="name" [(ngModel)]="draft.name" required />
+    </label>
+    <label>
+      Datum
+      <input type="date" name="date" [(ngModel)]="draft.date" required />
+    </label>
+    <label>
+      Locatie
+      <input type="text" name="location" [(ngModel)]="draft.location" />
+    </label>
+    <button type="submit" [disabled]="saving()">
+      {{ saving() ? 'Opslaan...' : 'Event aanmaken' }}
+    </button>
+  </form>
+}
+
+<div class="event-grid">
+  @for (event of events$ | async; track event.id) {
+    <a class="event-card" [routerLink]="['/admin/events', event.id]">
+      <h3>{{ event.name }}</h3>
+      <p>{{ event.date }}</p>
+      @if (event.location) {
+        <p class="location">{{ event.location }}</p>
+      }
+    </a>
+  } @empty {
+    <p class="empty">Nog geen events aangemaakt.</p>
+  }
+</div>

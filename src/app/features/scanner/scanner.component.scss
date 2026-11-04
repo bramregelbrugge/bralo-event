@@ -1,0 +1,85 @@
+.scanner-page {
+  min-height: 100vh;
+  background: #0f172a;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+
+  .back {
+    color: #cbd5e1;
+    text-decoration: none;
+  }
+
+  .count {
+    color: #94a3b8;
+    font-size: 0.9rem;
+  }
+}
+
+.reader {
+  flex: 1;
+  width: 100%;
+}
+
+.reader video {
+  width: 100%;
+}
+
+.camera-error {
+  padding: 1rem;
+  text-align: center;
+  color: #fca5a5;
+}
+
+.result-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+
+  &.ok {
+    background: rgba(22, 163, 74, 0.95);
+  }
+
+  &.warn {
+    background: rgba(217, 119, 6, 0.95);
+  }
+
+  &.bad {
+    background: rgba(220, 38, 38, 0.95);
+  }
+}
+
+.result-card {
+  text-align: center;
+  color: #fff;
+
+  h2 {
+    margin: 0 0 0.3rem;
+    font-size: 1.8rem;
+  }
+
+  .seat {
+    margin: 0 0 1rem;
+    opacity: 0.85;
+  }
+
+  .message {
+    font-size: 1.2rem;
+    margin: 0 0 1.5rem;
+  }
+
+  .tap {
+    opacity: 0.75;
+    font-size: 0.9rem;
+  }
+}

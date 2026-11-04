@@ -1,0 +1,30 @@
+<div class="login-page">
+  <form class="login-card" (ngSubmit)="submit()">
+    <h1>Bralo Event</h1>
+    <p class="subtitle">Log in om events en tickets te beheren</p>
+
+    <label>
+      E-mail
+      <input type="email" name="email" [(ngModel)]="email" required autocomplete="username" />
+    </label>
+
+    <label>
+      Wachtwoord
+      <input
+        type="password"
+        name="password"
+        [(ngModel)]="password"
+        required
+        autocomplete="current-password"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Bezig...' : 'Inloggen' }}
+    </button>
+  </form>
+</div>
